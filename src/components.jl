@@ -175,7 +175,7 @@ function isentropic_cryopump(state_in::AirState,p_out,η_pump)
 end
 
 function heater_coldstorage(state_in::AirState,coolant_max::CoolantState,pinch,pressure_loss)
-    state_out = State("Air",state_in.p+state_in.p*pressure_loss,coolant_max.T-pinch,state_in.mdot;phase = state_in.phase,y_N2 = state_in.y_N2,x_N2 = state_in.x_N2,liquid_fraction = state_in.liquid_fraction)
+    state_out = State("Air",state_in.p-state_in.p*pressure_loss,coolant_max.T-pinch,state_in.mdot;phase = state_in.phase,y_N2 = state_in.y_N2,x_N2 = state_in.x_N2,liquid_fraction = state_in.liquid_fraction)
     return state_out
 end
 

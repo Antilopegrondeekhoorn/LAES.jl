@@ -45,7 +45,7 @@ function discharge_cycle(state1R,p_2R,stateOil_in,oil_distribution,propane_max,m
     stateOil_in3 = State(stateOil_in.fluid,stateOil_in.p,stateOil_in.T,stateOil_in.mdot*oil_distribution[3])
         
     #calculate discharge process with guessed state 5R
-    state_5R_guess = State("Air",p_5R,T_guess_5R,state4R.mdot;phase = "gas",y_N2 = state4R.y_N2,x_N2 = state4R.x_N2,liquid_fraction = state4R.liquid_fraction)
+    state_5R_guess = State("Air",state4R-state4R*pressure_loss,T_guess_5R,state4R.mdot;phase = "gas",y_N2 = state4R.y_N2,x_N2 = state4R.x_N2,liquid_fraction = state4R.liquid_fraction)
     #discharging
     state6R,stateOil_out1 = intercooler("Heat",state_5R_guess,stateOil_in1,pinch_superheaters,pressure_loss)
     state7R = isentropic_expander(state6R,1590000,η_e)
