@@ -43,13 +43,13 @@ function charging_cycle_optimal(state_in::AirState,ambient_state::AirState,state
     return state1,state2A,state2B,state2C,state2,state4,state5,state6,state7,state9,state10,state1H,yield
 end
 
-function discharge_cycle(state1R::AirState,stateOil_in::OilState,oil_distribution,propane_max,methanol_max,pinch_coldbox,pinch_superheaters,expander_pressures,η_e,η_pump,pressure_loss)
+function discharge_cycle(state1R::AirState,stateOil_in::OilState,oil_distribution,propane_max,methanol_max,pinch_coldbox,pinch_superheaters,pressure_after_pump,expander_pressures,η_e,η_pump,pressure_loss)
     number_of_expanders = 3
     if length(expander_pressures) != number_of_expanders && length(oil_distribution) != number_of_expanders
         error("The length of the 'expander_pressures' and the 'oil_distribution' must be equal to the number of expanders.")
     end
 
-    state2R = isentropic_cryopump(state1R,p_2R,η_pump)
+    state2R = isentropic_cryopump(state1R,pressure_after_pump,η_pump)
     state3R = heater_coldstorage(state2R,propane_max,pinch_coldbox,pressure_loss)
     state4R = heater_coldstorage(state3R,methanol_max,pinch_coldbox,pressure_loss)
     
