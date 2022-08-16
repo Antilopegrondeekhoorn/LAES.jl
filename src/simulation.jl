@@ -7,7 +7,7 @@ function charging_cycle_optimal(state_in::AirState,stateOil_in::OilState,oil_dis
     end
 
     solutions = []
-    state1 = state_in
+    global state1 = state_in
 
     #distribution of thermal oil
     stateOil_in1 = State(stateOil_in.fluid,stateOil_in.p,stateOil_in.T,stateOil_in.mdot*oil_distribution[1])
