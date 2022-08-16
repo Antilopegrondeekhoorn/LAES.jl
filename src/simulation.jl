@@ -1,5 +1,5 @@
-#include("components.jl")
-using components
+include("components.jl")
+#using components
 function charging_cycle(state_in,pinch_IC,pinch_coldbox,pressure_loss_IC,stateOil_in,oil_distribution,methanol_min,methanol_max,propane_min,propane_max,η_c,η_e)
     solutions = []
     state1 = state_in

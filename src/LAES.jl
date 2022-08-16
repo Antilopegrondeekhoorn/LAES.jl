@@ -8,6 +8,7 @@ using CurveFit
 # load in diffent function files
 include("components.jl")
 include("helper_functions.jl")
+include("simulation.jl")
 
 export State
 export isentropic_compressor
