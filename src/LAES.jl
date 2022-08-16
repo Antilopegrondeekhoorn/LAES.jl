@@ -7,8 +7,8 @@ using DataFrames
 using CurveFit
 
 # load in diffent function files
-include("extra_file.jl")
 include("components.jl")
+include("helper_functions.jl")
 
 export isentropic_compressor
 export intercooler
