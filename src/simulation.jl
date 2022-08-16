@@ -1,6 +1,6 @@
 include("components.jl")
 
-function charging_cycle_optimal(state_in::AirState,stateOil_in::OilState,oil_distribution,methanol_min,methanol_max,propane_min,propane_max,pinch_IC,pinch_coldbox,compressor_pressures,η_c,η_e,pressure_loss)
+function charging_cycle_optimal(state_in::AirState,ambient_state::AirState,stateOil_in::OilState,oil_distribution,methanol_min,methanol_max,propane_min,propane_max,pinch_IC,pinch_coldbox,compressor_pressures,η_c,η_e,pressure_loss)
     number_of_compressors = 2
     if length(compressor_pressures) != number_of_compressors && length(oil_distribution) != number_of_compressors
         error("The length of the 'compressor_pressures' and the 'oil_distribution' must be equal to the number of compressors.")
@@ -24,11 +24,11 @@ function charging_cycle_optimal(state_in::AirState,stateOil_in::OilState,oil_dis
         global state6,state7 = separator(state5)
         global yield,T9 = pinch_coldbox_optimal(state2,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
         global state9 = State("Air",state1.p,T9,state7.mdot;phase = state7.phase,y_N2 = state7.y_N2,x_N2 = state7.x_N2,liquid_fraction = state7.liquid_fraction)
-        global state10 = State("Air",state1.p,T10,state6.mdot;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = state9.liquid_fraction)#standard conditions
+        global state10 = ambient_state
         global state1 = State("Air",state1.p,state9.mdot*state9.T+state10.mdot*state10.T,mdot1;phase = "gas",y_N2 = state9.mdot*state9.y_N2+state10.mdot*state10.y_N2,x_N2 = x_N2,liquid_fraction = state10.liquid_fraction)
         
         #check convergence
-        #println(i)
+        println("\r",i);flush(stdout)
         #println(state1) 
 
         push!(solutions,state1)
