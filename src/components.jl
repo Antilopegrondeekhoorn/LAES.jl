@@ -151,6 +151,16 @@ function coldbox(coolant1_min::CoolantState,coolant1_max::CoolantState,coolant2_
 end
 
 #########################################################################
+# Storage
+#########################################################################
+
+function storage_tank(state_in,p_storage)
+    T1R = CoolProp.PropsSI("T","P",p_storage,"Q",0,"PR::Nitrogen[$(state_in.x_N2)]&Oxygen[$(1-state_in.x_N2)]") #stored as saturated liquid
+    state_out = State("Air",100000,ustrip(T1R),state_in.mdot;phase = "liquid",y_N2 = state_in.y_N2,x_N2 = state_in.x_N2,liquid_fraction = state_in.liquid_fraction)
+    return state_out
+end
+
+#########################################################################
 # Discharge cycle
 #########################################################################
 
