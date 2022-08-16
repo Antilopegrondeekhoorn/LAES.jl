@@ -4,7 +4,7 @@ include("helper_functions.jl")
 # Charging cycle
 #########################################################################
 
-function isentropic_compressor(state_in,p_out,η_c)
+function isentropic_compressor(state_in::AirState,p_out,η_c)
     T_out_is = isentropic_T(state_in,p_out)
     h_out_is = CoolProp.PropsSI("H","T",T_out_is,"P|gas",ustrip(p_out),"PR::Nitrogen[$(state_in.y_N2)]&Oxygen[$(1-state_in.y_N2)]")
     h_out_real = (ustrip(h_out_is)-state_in.h)/η_c + state_in.h
@@ -154,7 +154,7 @@ end
 # Discharge cycle
 #########################################################################
 
-function isentropic_cryopump(state_in,p_out,η_pump)
+function isentropic_cryopump(state_in::AirState,p_out,η_pump)
     T_out_is = isentropic_T(state_in,p_out)
     h_out_is = CoolProp.PropsSI("H","T",T_out_is,"P|liquid",ustrip(p_out),"PR::Nitrogen[$(state_in.x_N2)]&Oxygen[$(1-state_in.x_N2)]")
     h_out_real = (ustrip(h_out_is)-state_in.h)/η_pump + state_in.h
@@ -169,7 +169,7 @@ function heater_coldstorage(state_in::AirState,coolant_max::CoolantState,pinch,p
     return state_out
 end
 
-function isentropic_expander(state_in,p_out,η_e)
+function isentropic_expander(state_in::AirState,p_out,η_e)
     T_out_is = isentropic_T(state_in,p_out)
     h_out_is = CoolProp.PropsSI("H","T",T_out_is,"P|gas",ustrip(p_out),"PR::Nitrogen[$(state_in.y_N2)]&Oxygen[$(1-state_in.y_N2)]")
     h_out_real = state_in.h- η_e*(state_in.h-ustrip(h_out_is))
