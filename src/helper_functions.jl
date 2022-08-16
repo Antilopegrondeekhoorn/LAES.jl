@@ -325,6 +325,15 @@ function flash_calculation(p,frac_N2,yield,pressure_in_words) #p given with unit
 end
 
 # Coldbox
+    
+function T_compressed_air(h,shifted_hs_compressed_air,T)
+    first_diff = shifted_hs_compressed_air[1]-shifted_hs_compressed_air[2]
+    if first_diff > 30
+        @warn("Make the 'hs_compressed_air' finer. The difference in enthalpy between the first two values should be smaller than 20 J/kg.")
+    end
+    index = findfirst(x -> x<=h,shifted_hs_compressed_air)
+    return T[index]
+end
 
 function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss_IC)
     # Compressed air
