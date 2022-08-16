@@ -1,4 +1,4 @@
-include("helper_functions.jl")
+#include("helper_functions.jl")
 
 #########################################################################
 # Charging cycle
