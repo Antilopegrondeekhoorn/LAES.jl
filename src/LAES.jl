@@ -1,7 +1,7 @@
 module LAES
 # Packages
 using CoolProp
-using Unitful: m, J, kPa, Pa, kg, K, W, °C, l, bar, MW, g, uconvert, °, ustrip, s, kW, hr,mol,kJ
+using Unitful: m, J, kPa, Pa, kg, K, W, °C, l, MW, g, uconvert, °, ustrip, s, kW, hr,mol,kJ
 using DataFrames
 using CurveFit
 
