@@ -46,7 +46,8 @@ function discharge_cycle(state1R,p_2R,stateOil_in,oil_distribution,propane_max,m
         
     #calculate discharge process with guessed state 5R
     T_guess_5R = 430 #[K]
-    state_5R_guess = State("Air",state4R.p-state4R.p*pressure_loss,T_guess_5R,state4R.mdot;phase = "gas",y_N2 = state4R.y_N2,x_N2 = state4R.x_N2,liquid_fraction = state4R.liquid_fraction)
+    p_5R = state4R.p-state4R.p*pressure_loss
+    state_5R_guess = State("Air",p_5R,T_guess_5R,state4R.mdot;phase = "gas",y_N2 = state4R.y_N2,x_N2 = state4R.x_N2,liquid_fraction = state4R.liquid_fraction)
 
     #discharging
     state6R,stateOil_out1 = intercooler("Heat",state_5R_guess,stateOil_in1,pinch_superheaters,pressure_loss)
