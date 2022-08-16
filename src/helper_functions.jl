@@ -54,7 +54,7 @@ mutable struct AirState
             s.s = s_liquid*liquid_fraction + s_vapor*(1-liquid_fraction)
             s.liquid_fraction = liquid_fraction
         else
-            @warn("Phase not implemented.")
+            @error("Phase not implemented.")
         end
         s.mdot = mdot
         return s
@@ -109,7 +109,7 @@ function State(fluid,p,T,mdot;phase=nothing,y_N2=nothing,x_N2=nothing,liquid_fra
     elseif fluid == "Methanol" || fluid == "Propane"
         return CoolantState(fluid,p,T,mdot)
     else 
-        @warn("Fluid not known")
+        @error("Fluid not known")
     end
 end
     
@@ -136,7 +136,7 @@ function isentropic_T(state_in,p_out)
         elseif state_in.phase == "liquid"
             s_is_guess = CoolProp.PropsSI("S","T",T_out_is_guess,"P|liquid",ustrip(p_out),"PR::Nitrogen[$(state_in.x_N2)]&Oxygen[$(1-state_in.x_N2)]")  #composition doesn't change
         else
-            @warn("The calculations of 'isentropic_T' can't be done in the phase of the input state.")
+            @error("The calculations of 'isentropic_T' can't be done in the phase of the input state.")
         end
         #change step when closer to solution
         diff = abs(ustrip(s_is_guess)-state_in.s) 
@@ -167,7 +167,7 @@ function isentropic_T(state_in,p_out)
         #prevent being in an infinite loop
         if iterations%4 == 0
             if sum(prev_steps) ==  0
-                @warn "Infinite loop: adjust the steps"
+                @error("Infinite loop: adjust the steps")
                 break
             end
             prev_steps = []
@@ -187,7 +187,7 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
         elseif state_in.phase == "liquid"
             h_out_real_guess = CoolProp.PropsSI("H","T",T_out_real_guess,"P|liquid",ustrip(p_out),"PR::Nitrogen[$(state_in.x_N2)]&Oxygen[$(1-state_in.x_N2)]")  #composition doesn't change
         else
-            @warn("The calculations of 'T_real' can't be done in the phase of the input state.")
+            @error("The calculations of 'T_real' can't be done in the phase of the input state.")
         end
         #change step when closer to solution
         diff = abs(ustrip(h_out_real_guess)-h_out_real) 
@@ -219,11 +219,9 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
         end
         #prevent being in an infinite loop
         if iterations%4 == 0
-            if isempty(prev_steps) == false
-                if sum(prev_steps) ==  0
-                    @warn "Infinite loop: adjust the steps"
-                    break
-                end
+            if sum(prev_steps) ==  0
+                @error("Infinite loop: adjust the steps")
+                break
             end
             prev_steps = []
         end   
@@ -289,7 +287,7 @@ function interpolate_K(T,air_component,pressure_in_words)
         value1 = Ks_O2[index,2]
         value2 = Ks_O2[index+1,2]
     else 
-        @warn("Component of the air not known. Air is considered a mixture of Nitrogen and Oxygen")
+        @error("Component of the air not known. Air is considered a mixture of Nitrogen and Oxygen")
     end
     new_value = value1 + (T-T1)/(T2-T1)*(value2-value1)
     return new_value
@@ -331,7 +329,7 @@ end
 function T_compressed_air(h,shifted_hs_compressed_air,T)
     first_diff = shifted_hs_compressed_air[1]-shifted_hs_compressed_air[2]
     if first_diff > 30
-        @warn("Make the 'hs_compressed_air' finer. The difference in enthalpy between the first two values should be smaller than 20 J/kg.")
+        @warn("Make the 'hs_compressed_air' finer. The difference in enthalpy between the first two values should be smaller than 30 J/kg.")
     end
     index = findfirst(x -> x<=h,shifted_hs_compressed_air)
     return T[index]
@@ -436,7 +434,7 @@ function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_mi
         #prevent being in an infinite loop
         if iterations%4 == 0
             if sum(prev_steps) ==  0
-                @warn "Infinite loop: adjust the steps"
+                @error("Infinite loop: adjust the steps")
                 break
             end
             prev_steps = []
@@ -517,7 +515,7 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
         #prevent being in an infinite loop
         if iterations%4 == 0
             if sum(prev_steps) ==  0
-                @warn "Infinite loop: adjust the steps"
+                @error("Infinite loop: adjust the steps")
                 break
             end
             prev_steps = []
@@ -595,7 +593,7 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         #prevent being in an infinite loop
         if iterations%4 == 0
             if sum(prev_steps) ==  0
-                @warn "Infinite loop: adjust the steps"
+                @error("Infinite loop: adjust the steps")
                 break
             end
             prev_steps = []
@@ -654,7 +652,7 @@ function find_T_5R(h_5R,p_5R,y_N2)
         #prevent being in an infinite loop
         if iterations%4 == 0
             if sum(prev_steps) ==  0
-                @warn "Infinite loop: adjust the steps"
+                @error("Infinite loop: adjust the steps")
                 break
             end
             prev_steps = []
