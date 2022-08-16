@@ -241,13 +241,14 @@ end
 
 function T_Essotherm650(h)
     # Rough search
-    T = 150:1:1000
+    T = 200:1:1000
     hs = []
     for i = 1:length(T)
         x = h_Essotherm650(T[i])
         push!(hs,x)
     end
     index = findfirst(x->x>h,hs)
+    println(index)
     # Fine search
     T = T[index]-1:0.001:T[index]+1
     hs = []
