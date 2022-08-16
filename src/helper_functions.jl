@@ -461,7 +461,6 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
         h_cold_air_in = CoolProp.PropsSI("H","P|gas",102000,"T",T_cold_air_in,"PR::Nitrogen[$(state7.y_N2)]&Oxygen[$(1-state7.y_N2)]")
         h_cold_air_out = CoolProp.PropsSI("H","P|gas",100000,"T",T_cold_air_out_optimal,"PR::Nitrogen[$(state7.y_N2)]&Oxygen[$(1-state7.y_N2)]") #from the optimal case
 
- 
         p = poly_fit(range(h_max_compressed_air,0,1000),range(T_cold_air_out_optimal,T_cold_air_in,1000),1)
         Qcoldair(h) = p[1]+p[2]*h
 
@@ -474,7 +473,7 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
         pinch = minimum(search_pinch)
     
         diff = abs(pinch_coldbox - pinch)
-        #println(diff)
+        
         if diff > 5
             step = 5
         elseif 2 < diff < 5
@@ -492,7 +491,7 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
         else
             step = 0.001
         end
-        #println(step)
+        
         if diff < 0.005
             global T_compressed_air_out = T_guess_compressed_air_out
             break
@@ -503,7 +502,7 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
             T_guess_compressed_air_out -= step
             push!(prev_steps,-1)
         end
-        #println(prev_steps)
+        
         #prevent being in an infinite loop
         if iterations%4 == 0
             if sum(prev_steps) ==  0
@@ -547,8 +546,6 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         h_cold_air_out_guess = CoolProp.PropsSI("H","P|gas",100000,"T",T_guess_cold_air_out,"PR::Nitrogen[$(state7.y_N2)]&Oxygen[$(1-state7.y_N2)]") 
         diff = abs(h_cold_air_out- h_cold_air_out_guess)
         
-        #println(diff)
-        
         if diff > 10000
             step = 10
         elseif 5000 < diff < 10000
@@ -572,7 +569,6 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         else
             step = 0.001
         end
-        #println(step)
         
         if diff < 5
             global T_cold_air_out = T_guess_cold_air_out
@@ -584,7 +580,6 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
             T_guess_cold_air_out -= step
             push!(prev_steps,-1)
         end
-        #println(prev_steps)
 
         #prevent being in an infinite loop
         if iterations%4 == 0
