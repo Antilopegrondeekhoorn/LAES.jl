@@ -24,6 +24,8 @@ export pinch_coldbox_p_more_optimal
 export compare
 export find_T_5R
 
+export storage_tank
+
 export isentropic_compressor
 export intercooler
 export isentropic_cryoexpander
