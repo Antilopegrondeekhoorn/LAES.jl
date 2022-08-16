@@ -614,7 +614,7 @@ end
 
 # Extra function for the discharge cycle
 
-function find_T_5R(h_5R,y_N2)
+function find_T_5R(h_5R,p_5R,y_N2)
     T_5R_guess = 430K  
     iterations = 0
     prev_steps = []

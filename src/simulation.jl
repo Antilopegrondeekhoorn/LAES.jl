@@ -60,7 +60,7 @@ function discharge_cycle(state1R,p_2R,stateOil_in,oil_distribution,propane_max,m
     
     #energy balance over heat exchanger
     h_5R = state11R.h-state12R.h+state4R.h
-    T_5R = find_T_5R(h_5R,state_5R_guess.y_N2)
+    T_5R = find_T_5R(h_5R,p_5R,state_5R_guess.y_N2)
         
     #define state5R
     state5R = State("Air",p_5R,ustrip(T_5R),state4R.mdot;phase = "gas",y_N2 = state4R.y_N2,x_N2 = state4R.x_N2,liquid_fraction = state4R.liquid_fraction)
