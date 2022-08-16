@@ -34,7 +34,7 @@ function charging_cycle(state_in,pinch_IC,pinch_coldbox,pressure_loss_IC,stateOi
     return state1,state2A,state2B,state2C,state2,state4,state5,state6,state7,state9,state10,stateOil_out1,stateOil_out2
 end
 
-function discharge(state1R,p_2R,stateOil_in,oil_distribution,propane_max,methanol_max,pinch_coldbox,pinch_superheaters,η_e,η_pump,pressure_loss)
+function discharge_cycle(state1R,p_2R,stateOil_in,oil_distribution,propane_max,methanol_max,pinch_coldbox,pinch_superheaters,η_e,η_pump,pressure_loss)
     state2R = isentropic_cryopump(state1R,p_2R,η_pump)
     state3R = heater_coldstorage(state2R,propane_max,pinch_coldbox,pressure_loss)
     state4R = heater_coldstorage(state3R,methanol_max,pinch_coldbox,pressure_loss)

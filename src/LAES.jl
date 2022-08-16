@@ -34,4 +34,7 @@ export coldbox
 export isentropic_cryopump
 export heater_coldstorage
 export isentropic_expander
+
+export charging_cycle
+export discharge_cycle
 end
