@@ -11,6 +11,18 @@ include("helper_functions.jl")
 include("simulation.jl")
 
 export State
+export isentropic_T
+export T_real
+export h_Essotherm650
+export T_Essotherm650
+export interpolate_K
+export flash_calculation
+export pinch_coldbox_optimal
+export pinch_coldbox_p_less_optimal
+export pinch_coldbox_p_more_optimal
+export compare
+export find_T_5R
+
 export isentropic_compressor
 export intercooler
 export isentropic_cryoexpander
