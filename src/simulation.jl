@@ -85,7 +85,7 @@ function discharge_cycle(state1R::AirState,stateOil_in::OilState,oil_distributio
     global state8R,stateOil_out2 = intercooler("Heat",state7R,stateOil_in2,pinch_superheaters,pressure_loss)
     global state9R = isentropic_expander(state8R,expander_pressures[2],η_e)
     global state10R,stateOil_out3 = intercooler("Heat",state9R,stateOil_in3,pinch_superheaters,pressure_loss)
-    global state11R = isentropic_expander(state10R,expander_pressures[2],η_e)
+    global state11R = isentropic_expander(state10R,expander_pressures[3],η_e)
     global state12R = State("Air",state11R.p-state11R.p*pressure_loss,state4R.T+pinch_coldbox,state11R.mdot;phase = state11R.phase,y_N2 = state11R.y_N2,x_N2 = state11R.x_N2,liquid_fraction = state11R.liquid_fraction)
 
     state4H = State("Essotherm650",stateOil_out1.p,(stateOil_out1.T*oil_distribution[1]+stateOil_out2.T*oil_distribution[2]+stateOil_out3.T*oil_distribution[3]),(stateOil_out1.mdot+stateOil_out2.mdot+stateOil_out3.mdot))
