@@ -10,6 +10,7 @@ using CurveFit
 include("components.jl")
 include("helper_functions.jl")
 
+export State
 export isentropic_compressor
 export intercooler
 export isentropic_cryoexpander
