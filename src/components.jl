@@ -13,7 +13,6 @@ function isentropic_compressor(state_in::AirState,p_out,η_c)
     state_out = State("Air",ustrip(p_out),ustrip(T_out_real),state_in.mdot;phase = state_in.phase,y_N2 = state_in.y_N2,x_N2 = state_in.x_N2,liquid_fraction = state_in.liquid_fraction)
     return state_out
 end
-
 function intercooler(func::String,state_in_air::AirState,state_in_oil::OilState,pinch,pressureloss)
     #pinch at the cold end of the intercooler???
     if func == "Cool"
@@ -35,7 +34,6 @@ function intercooler(func::String,state_in_air::AirState,state_in_oil::OilState,
     
     return state_out_air,state_out_oil
 end
-
 
 function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
     #isentropic calculations

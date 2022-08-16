@@ -219,9 +219,11 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
         end
         #prevent being in an infinite loop
         if iterations%4 == 0
-            if sum(prev_steps) ==  0
-                @warn "Infinite loop: adjust the steps"
-                break
+            if isempty(prev_steps) == false
+                if sum(prev_steps) ==  0
+                    @warn "Infinite loop: adjust the steps"
+                    break
+                end
             end
             prev_steps = []
         end   
