@@ -93,7 +93,7 @@ function charging_cycle_suboptimal(state_in::AirState,ambient_state::AirState,st
         end
     end
     state1H = State("Essotherm650",stateOil_out1.p,(stateOil_out1.T*oil_distribution[1]+stateOil_out2.T*oil_distribution[2]),(stateOil_out1.mdot+stateOil_out2.mdot))
-    return state1,state2A,state2B,state2C,state2,state4,state5,state6,state7,state9,state10,state1H,yield
+    return state1,state2A,state2B,state2C,state2,state4,state5,state6,state7,state9,state10,state1H,yield,T4,T9
 end
 
 function discharge_cycle(state1R::AirState,stateOil_in::OilState,oil_distribution,propane_max,methanol_max,pinch_coldbox,pinch_superheaters,pressure_after_pump,expander_pressures,η_e,η_pump,pressure_loss)
