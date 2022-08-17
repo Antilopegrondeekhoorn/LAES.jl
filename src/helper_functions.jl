@@ -209,9 +209,9 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
             step = 0.5K
         elseif 250 < diff < 500
             step = 0.1K
-        elseif 100 < diff < 250
+        elseif 75 < diff < 250
             step = 0.05K
-        elseif 75 < diff < 100
+        elseif 25 < diff < 75
             step = 0.01K
         else
             step = 0.001K
