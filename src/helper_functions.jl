@@ -575,21 +575,19 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
             step = 2
         elseif 1250 < diff < 2500
             step = 1
-        elseif 750 < diff < 1250
+        elseif 500 < diff < 1250
             step = 0.5
-        elseif 200 < diff < 750
+        elseif 150 < diff < 500
             step = 0.1
-        elseif 75 < diff < 200
+        elseif 75 < diff < 150
             step = 0.05
-        elseif 50 < diff < 75
+        elseif 25 < diff < 75
             step = 0.01
-        elseif 20 < diff < 50
-            step = 0.005
         else
-            step = 0.002
+            step = 0.005
         end
         println(step)
-        if diff < 15
+        if diff < 20
             global T_cold_air_out = T_guess_cold_air_out
             break
         elseif h_cold_air_out_guess < h_cold_air_out
@@ -601,7 +599,7 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         end
         println(prev_steps)
         #prevent being in an infinite loop
-        if iterations%4 == 0
+        if iterations%6 == 0
             if sum(prev_steps) ==  0
                 @error("Infinite loop: adjust the steps")
                 break
