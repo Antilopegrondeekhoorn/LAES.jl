@@ -443,7 +443,7 @@ function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_mi
     return state6.mdot,T_cold_air_out
 end
 
-function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_cold_air_out_optimal,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss_IC)
+function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_cold_air_out_optimal,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
     iterations = 0
     prev_steps = []
     T_guess_compressed_air_out = 115
@@ -461,8 +461,8 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
         global h_max_compressed_air = maximum(shifted_h_airs)
     
         # Cold air
-        state3_p = state_compressed_air_in.p-state_compressed_air_in.p*pressure_loss_IC
-        state4 = State("Air",state3_p-state3_p*pressure_loss_IC,T_guess_compressed_air_out,state_compressed_air_in.mdot;phase = state_compressed_air_in.phase,y_N2 = state_compressed_air_in.y_N2,x_N2 = state_compressed_air_in.x_N2,liquid_fraction = state_compressed_air_in.liquid_fraction)
+        state3_p = state_compressed_air_in.p-state_compressed_air_in.p*pressure_loss
+        state4 = State("Air",state3_p-state3_p*pressure_loss,T_guess_compressed_air_out,state_compressed_air_in.mdot;phase = state_compressed_air_in.phase,y_N2 = state_compressed_air_in.y_N2,x_N2 = state_compressed_air_in.x_N2,liquid_fraction = state_compressed_air_in.liquid_fraction)
         state5 =  isentropic_cryoexpander(state4,102000Pa,η_e)
         global state6,state7 = separator(state5)
 
@@ -525,7 +525,7 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
     return state6.mdot,T_compressed_air_out
 end
 
-function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_compressed_air_out_optimal,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss_IC)
+function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_compressed_air_out_optimal,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
     iterations = 0
     prev_steps = []
     T_guess_cold_air_out = 300
@@ -543,8 +543,8 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         global h_max_compressed_air = maximum(shifted_h_airs)
     
         # Cold air
-        state3_p = state_compressed_air_in.p-state_compressed_air_in.p*pressure_loss_IC
-        state4 = State("Air",state3_p-state3_p*pressure_loss_IC,T_compressed_air_out_optimal,state_compressed_air_in.mdot;phase = state_compressed_air_in.phase,y_N2 = state_compressed_air_in.y_N2,x_N2 = state_compressed_air_in.x_N2,liquid_fraction = state_compressed_air_in.liquid_fraction)
+        state3_p = state_compressed_air_in.p-state_compressed_air_in.p*pressure_loss
+        state4 = State("Air",state3_p-state3_p*pressure_loss,T_compressed_air_out_optimal,state_compressed_air_in.mdot;phase = state_compressed_air_in.phase,y_N2 = state_compressed_air_in.y_N2,x_N2 = state_compressed_air_in.x_N2,liquid_fraction = state_compressed_air_in.liquid_fraction)
         state5 =  isentropic_cryoexpander(state4,102000Pa,η_e)
         global state6,state7 = separator(state5)
 
