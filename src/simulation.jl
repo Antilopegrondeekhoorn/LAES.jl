@@ -41,15 +41,15 @@ function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::
         global state1 = State("Air",state1.p,state9.mdot*state9.T+state10.mdot*state10.T,state1.mdot;phase = "gas",y_N2 = state9.mdot*state9.y_N2+state10.mdot*state10.y_N2,x_N2 = x_N2,liquid_fraction = state10.liquid_fraction)
         
         #check convergence
-        println("\r",i);flush(stdout)
+        println("\r","Iteration:",i);flush(stdout)
         #println(state1) 
 
         push!(solutions,state1)
         if length(solutions) > 1 && compare(solutions[end-1],solutions[end])
             break
         end
-        if i == 20
-            @error("Did not converge after 20 iterations")
+        if i == 15
+            @error("Did not converge after 15 iterations")
         end
     end
     state1H = State("Essotherm650",stateOil_out1.p,(stateOil_out1.T*oil_distribution[1]+stateOil_out2.T*oil_distribution[2]),(stateOil_out1.mdot+stateOil_out2.mdot))
