@@ -63,13 +63,13 @@ function charging_cycle_suboptimal(state_in::AirState,ambient_state::AirState,st
         global state2,stateOil_out2 = intercooler("Cool",state2C,stateOil_in2,pinch_IC,pressure_loss)
         state3_p = state2.p-state2.p*pressure_loss
         
-        if compressor_pressures[end] < 17917000 #Assume that the optimal pressurein the reference paper is the effective optimal pressure
+        if compressor_pressures[end] < 17917000 #Assume that the optimal pressure in the reference paper is the effective optimal pressure
             ~,T9 = pinch_coldbox_optimal(state2,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
-            yield,T4 = pinch_coldbox_p_less_optimal(state2,pinch_coldbox,T9,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
+            global yield,T4 = pinch_coldbox_p_less_optimal(state2,pinch_coldbox,T9,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
             
         else
             T4 = propane_min.T+pinch_coldbox
-            yield,T9 = pinch_coldbox_p_more_optimal(state2,pinch_coldbox,T4,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
+            global yield,T9 = pinch_coldbox_p_more_optimal(state2,pinch_coldbox,T4,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
         end
 
         global state4 = State("Air",state3_p-state3_p*pressure_loss,T4,state2.mdot;phase = state2.phase,y_N2 = state2.y_N2,x_N2 = state2.x_N2,liquid_fraction = state2.liquid_fraction)
