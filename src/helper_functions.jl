@@ -567,21 +567,21 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         h_cold_air_out_guess = CoolProp.PropsSI("H","P|gas",100000,"T",T_guess_cold_air_out,"PR::Nitrogen[$(state7.y_N2)]&Oxygen[$(1-state7.y_N2)]") 
         diff = abs(h_cold_air_out- h_cold_air_out_guess)
         println(diff)
-        if diff > 10000
+        if diff > 15000
             step = 10
-        elseif 5000 < diff < 10000
+        elseif 7500 < diff < 15000
             step = 5
-        elseif 2000 < diff < 5000
+        elseif 2500 < diff < 7500
             step = 2
-        elseif 1000 < diff < 2000
+        elseif 1250 < diff < 2500
             step = 1
-        elseif 500 < diff < 1000
+        elseif 750 < diff < 1250
             step = 0.5
-        elseif 200 < diff < 500
+        elseif 250 < diff < 750
             step = 0.1
-        elseif 100 < diff < 200
+        elseif 100 < diff < 250
             step = 0.01
-        elseif 75 < diff < 100
+        elseif 50 < diff < 100
             step = 0.002
         else
             step = 0.001
