@@ -140,6 +140,7 @@ function isentropic_T(state_in,p_out)
         end
         #change step when closer to solution
         diff = abs(ustrip(s_is_guess)-state_in.s) 
+        println(diff)
         if diff > 200
             step = 2K
         elseif 100 < diff < 200
@@ -153,6 +154,7 @@ function isentropic_T(state_in,p_out)
         else
             step = 0.01K
         end
+        println(step)
         #change the temperature guess
         if diff < 0.08
             global T_out_is = T_out_is_guess
@@ -164,6 +166,7 @@ function isentropic_T(state_in,p_out)
             T_out_is_guess -= step
             push!(prev_steps,-1)
         end
+        println(prev_steps)
         #prevent being in an infinite loop
         if iterations%4 == 0
             if sum(prev_steps) ==  0
