@@ -36,7 +36,6 @@ function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::
         global state4 = State("Air",state3_p-state3_p*pressure_loss,T4,state2.mdot;phase = state2.phase,y_N2 = state2.y_N2,x_N2 = state2.x_N2,liquid_fraction = state2.liquid_fraction)
         global state5 =  isentropic_cryoexpander(state4,102000,η_e)
         global state6,state7 = separator(state5)
-        println(state6)
         global state9 = State("Air",state1.p,T9,state7.mdot;phase = state7.phase,y_N2 = state7.y_N2,x_N2 = state7.x_N2,liquid_fraction = state7.liquid_fraction)
         global state10 = State("Air",ambient_state.p,ambient_state.T,state6.mdot;phase = ambient_state.phase,y_N2 = ambient_state.y_N2,x_N2 = ambient_state.x_N2,liquid_fraction = ambient_state.liquid_fraction) #standard conditions
         global state1 = State("Air",state1.p,state9.mdot*state9.T+state10.mdot*state10.T,state1.mdot;phase = "gas",y_N2 = state9.mdot*state9.y_N2+state10.mdot*state10.y_N2,x_N2 = x_N2,liquid_fraction = state10.liquid_fraction)
