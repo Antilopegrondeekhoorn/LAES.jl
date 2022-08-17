@@ -577,12 +577,14 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
             step = 1
         elseif 750 < diff < 1250
             step = 0.5
-        elseif 250 < diff < 750
+        elseif 200 < diff < 750
             step = 0.1
-        elseif 100 < diff < 250
+        elseif 75 < diff < 200
+            step = 0.05
+        elseif 50 < diff < 75
             step = 0.01
-        elseif 50 < diff < 100
-            step = 0.002
+        elseif 20 < diff < 50
+            step = 0.005
         else
             step = 0.001
         end
