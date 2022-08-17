@@ -586,7 +586,7 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         elseif 20 < diff < 50
             step = 0.005
         else
-            step = 0.001
+            step = 0.002
         end
         println(step)
         if diff < 15
