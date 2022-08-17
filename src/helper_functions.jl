@@ -187,27 +187,33 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
         elseif state_in.phase == "liquid"
             h_out_real_guess = CoolProp.PropsSI("H","T",T_out_real_guess,"P|liquid",ustrip(p_out),"PR::Nitrogen[$(state_in.x_N2)]&Oxygen[$(1-state_in.x_N2)]")  #composition doesn't change
         else
-            @error("The calculations of 'T_real' can't be done in the phase of the input state.")
+            @warn("The calculations of 'T_real' can't be done in the phase of the input state.")
         end
         #change step when closer to solution
         diff = abs(ustrip(h_out_real_guess)-h_out_real) 
-        if diff > 5000
+        
+        if diff > 15000
+            step = 10K
+        elseif 5000 < diff < 15000
+            step = 5K
+        elseif 2000 < diff < 5000
             step = 2K
-        elseif 1000 < diff < 5000
+        elseif 1000 < diff < 2000
             step = 1K
         elseif 500 < diff < 1000
             step = 0.5K
-        elseif 200 < diff < 500
+        elseif 250 < diff < 500
             step = 0.1K
-        elseif 100 < diff < 200
+        elseif 75 < diff < 250
             step = 0.05K
-        elseif 50 < diff < 100
+        elseif 25 < diff < 75
             step = 0.01K
         else
             step = 0.001K
         end
+        
         #change the temperature guess
-        if diff < 1
+        if diff < 5
             global T_out_real = T_out_real_guess
             break
         elseif ustrip(h_out_real_guess) < h_out_real
@@ -217,10 +223,11 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
             T_out_real_guess -= step
             push!(prev_steps,-1)
         end
+        
         #prevent being in an infinite loop
         if iterations%4 == 0
             if sum(prev_steps) ==  0
-                @error("Infinite loop: adjust the steps")
+                @warn "Infinite loop: adjust the steps"
                 break
             end
             prev_steps = []

@@ -1,5 +1,5 @@
 include("helper_functions.jl")
-#using helper_functions
+
 #########################################################################
 # Charging cycle
 #########################################################################
@@ -37,8 +37,11 @@ end
 
 function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
     #isentropic calculations
-    yield_guess_is = 0.88
+    iterations = 0
+    prev_steps = []
+    yield_guess_is = 0.88    
     while true
+        iterations +=1
         T_out, y_N2,x_N2,y_O2,x_O2 = flash_calculation(p_out,state_in.y_N2,yield_guess_is,"1atm") 
 
         h_liquid = CoolProp.PropsSI("H","P|liquid",ustrip(p_out),"T",T_out,"PR::Nitrogen[$x_N2]&Oxygen[$x_O2]")
@@ -49,20 +52,51 @@ function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
         s_vapor = CoolProp.PropsSI("S","P|gas",ustrip(p_out),"T",T_out,"PR::Nitrogen[$y_N2]&Oxygen[$y_O2]")
         s_out_is = s_liquid*yield_guess_is + s_vapor*(1-yield_guess_is)
         
-        if abs(state_in.s-ustrip(s_out_is)) <0.2 #arbitrary value
+        diff = abs(state_in.s-ustrip(s_out_is))
+       
+        if diff > 300
+            step = 0.1
+        elseif 150 < diff < 300
+            step = 0.01
+        elseif 75 < diff < 150
+            step = 0.005
+        elseif 25 < diff < 75
+            step = 0.001
+        elseif 10 < diff < 25
+            step = 0.0005
+        elseif 4 < diff < 10
+            step = 0.0001
+        else
+            step = 0.00005
+        end
+        
+        if diff <0.1 #arbitrary value
             global yield_is = yield_guess_is
             break
         elseif ustrip(s_out_is) < state_in.s
-            yield_guess_is -=0.00005
+            yield_guess_is -=step
+            push!(prev_steps,-1)
         elseif ustrip(s_out_is) > state_in.s
-            yield_guess_is +=0.00005
+            yield_guess_is +=step
+            push!(prev_steps,+1)
+        end
+        #prevent being in an infinite loop
+        if iterations%4 == 0
+            if sum(prev_steps) ==  0
+                @warn "Infinite loop: adjust the steps"
+                break
+            end
+            prev_steps = []
         end
     end
     h_out_real = state_in.h- η_e*(state_in.h-ustrip(h_out_is))
     
     # Real calculations
-    yield_guess_real = 0.854
+    iterations = 0
+    prev_steps = []
+    yield_guess_real = 0.84
     while true
+        iterations +=1
         global T_out, y_N2,x_N2,y_O2,x_O2 = flash_calculation(p_out,state_in.y_N2,yield_guess_real,"1atm") 
         
         h_liquid = CoolProp.PropsSI("H","P|liquid",ustrip(p_out),"T",T_out,"PR::Nitrogen[$x_N2]&Oxygen[$x_O2]")
@@ -72,15 +106,44 @@ function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
         s_liquid = CoolProp.PropsSI("S","P|liquid",ustrip(p_out),"T",T_out,"PR::Nitrogen[$x_N2]&Oxygen[$x_O2]")
         s_vapor = CoolProp.PropsSI("S","P|gas",ustrip(p_out),"T",T_out,"PR::Nitrogen[$y_N2]&Oxygen[$y_O2]")
         global s_out = s_liquid*yield_guess_real + s_vapor*(1-yield_guess_real)
-
-        if abs(h_out_real-ustrip(h_out)) <25
+        
+        #change step when closer to solution
+        diff = abs(h_out_real-ustrip(h_out))
+        
+        if diff > 5000
+            step = 0.02
+        elseif 2500 < diff < 5000
+            step = 0.01
+        elseif 1000 < diff < 2500
+            step = 0.005
+        elseif 400 < diff < 1000
+            step = 0.001
+        elseif 25 < diff < 400
+            step = 0.0001
+        else
+            step = 0.00005
+        end
+        
+        #change the yield guess
+        if diff <15
             global yield_real = yield_guess_real
             break
         elseif ustrip(h_out) < h_out_real
-            yield_guess_real -=0.0001
+            yield_guess_real -=step
+            push!(prev_steps,-1)
         elseif ustrip(h_out) > h_out_real
-            yield_guess_real +=0.0001
+            yield_guess_real +=step
+            push!(prev_steps,+1)
         end
+        
+        #prevent being in an infinite loop
+        if iterations%8 == 0
+            if sum(prev_steps) ==  0
+                @warn "Infinite loop: adjust the steps"
+                break
+            end
+            prev_steps = []
+        end   
     end
     state_out = State("Air",ustrip(p_out),ustrip(T_out),state_in.mdot;phase = "2phase",y_N2 = y_N2,x_N2 = x_N2,liquid_fraction = yield_real)
     return state_out
