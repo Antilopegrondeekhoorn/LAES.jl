@@ -1,6 +1,6 @@
 include("components.jl")
 
-function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::OilState,oil_distribution,methanol_min,methanol_max,propane_min,propane_max,pinch_IC,pinch_coldbox,compressor_pressures,η_c,η_e,pressure_loss)
+function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::OilState,oil_distribution,methanol_min,methanol_max,propane_min,propane_max,pinch_IC,pinch_coldbox,compressor_pressures,η_c,η_cryo_e,pressure_loss)
     number_of_compressors = 2
     if length(compressor_pressures) != number_of_compressors && length(oil_distribution) != number_of_compressors
         error("The length of the 'compressor_pressures' and the 'oil_distribution' must be equal to the number of compressors.")
@@ -24,17 +24,17 @@ function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::
 
         if state2.p == 17917000
             global T4 = propane_min.T+pinch_coldbox
-            global yield,T9 = pinch_coldbox_optimal(state2,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
+            global yield,T9 = pinch_coldbox_optimal(state2,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
         elseif state2.p < 17917000 #Assume that the optimal pressure in the reference paper is the effective optimal pressure
-            global ~,T9 = pinch_coldbox_optimal(state2_optimal,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
-            global yield,T4 = pinch_coldbox_p_less_optimal(state2,pinch_coldbox,T9,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
+            global ~,T9 = pinch_coldbox_optimal(state2_optimal,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
+            global yield,T4 = pinch_coldbox_p_less_optimal(state2,pinch_coldbox,T9,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
         elseif state2.p > 17917000
             global T4 = propane_min.T+pinch_coldbox
-            global yield,T9 = pinch_coldbox_p_more_optimal(state2,pinch_coldbox,T4,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
+            global yield,T9 = pinch_coldbox_p_more_optimal(state2,pinch_coldbox,T4,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
         end
 
         global state4 = State("Air",state3_p-state3_p*pressure_loss,T4,state2.mdot;phase = state2.phase,y_N2 = state2.y_N2,x_N2 = state2.x_N2,liquid_fraction = state2.liquid_fraction)
-        global state5 =  isentropic_cryoexpander(state4,102000,η_e)
+        global state5 =  isentropic_cryoexpander(state4,102000,η_cryo_e)
         global state6,state7 = separator(state5)
         global state9 = State("Air",state1.p,T9,state7.mdot;phase = state7.phase,y_N2 = state7.y_N2,x_N2 = state7.x_N2,liquid_fraction = state7.liquid_fraction)
         global state10 = State("Air",ambient_state.p,ambient_state.T,state6.mdot;phase = ambient_state.phase,y_N2 = ambient_state.y_N2,x_N2 = ambient_state.x_N2,liquid_fraction = ambient_state.liquid_fraction) #standard conditions
