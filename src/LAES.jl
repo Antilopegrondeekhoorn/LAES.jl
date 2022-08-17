@@ -36,5 +36,6 @@ export heater_coldstorage
 export isentropic_expander
 
 export charging_cycle_optimal
+export charging_cycle_suboptimal
 export discharge_cycle
 end
