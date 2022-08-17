@@ -1,10 +1,8 @@
-#using helper_functions
-#using components
 using LAES
 using Test
 
 #########################################################################
-# Use the reference paper of Guizzi to validate the functions
+# Use the reference paper of Guizzi to validate the component functions
 #########################################################################
 
 # Data charging cycle
@@ -67,9 +65,6 @@ state4C_guizzi = State("Methanol",100000,288,0.437)
 # Tests charging cycle
 #########################################################################
 
-# State functions
-
-
 # Compressors
 state2A = isentropic_compressor(state1_guizzi,1480000,0.85)
 T_difference_2A = abs((state2A.T -state2A_guizzi.T)/state2A_guizzi.T)
@@ -89,7 +84,7 @@ stateOil_in2 = State(state2H_guizzi.fluid,state2H_guizzi.p,state2H_guizzi.T,stat
 state2B,stateOil_out1 = intercooler("Cool",state2A_guizzi,stateOil_in1,10,0.01)
 state2,stateOil_out2 = intercooler("Cool",state2C_guizzi,stateOil_in2,10,0.01)
 
-    # Outlet temperature of air isn't 308.15K (probably an error)!!!! --> pinch becomes 20K
+    # Outlet temperature of air isn't 308.15K !!!! --> pinch becomes 20K
 state2B,stateOil_out1 = intercooler("Cool",state2A_guizzi,stateOil_in1,20,0.01)
 T_difference_2B = abs((state2B.T -state2B_guizzi.T)/state2B_guizzi.T)
 p_difference_2B = abs((state2B.p -state2B_guizzi.p)/state2B_guizzi.p)
@@ -162,7 +157,30 @@ end
 
 # Cryo-pump
 state2R = isentropic_cryopump(state1R_guizzi,6500000,0.7)
+T_difference_2R = abs((state2R.T -state2R_guizzi.T)/state2R_guizzi.T)
+
+@testset "Cryo-pump" begin
+    @test T_difference_2R < 0.01
+    @test state2R.mdot == state2R_guizzi.mdot
+    @test state2R.x_N2 == state2R_guizzi.x_N2
+    @test state2R.y_N2 == state2R_guizzi.y_N2
+    @test state2R.liquid_fraction == state2R_guizzi.liquid_fraction
+end
 
 # Heaters
 state3R = heater_coldstorage(state2R_guizzi,state2C_guizzi,5,0.01)
 state4R = heater_coldstorage(state3R_guizzi,state4C_guizzi,5,0.01)
+
+@testset "Heaters" begin
+    @test state3R.T == state3R_guizzi.T
+    @test state4R.T == state4R_guizzi.T
+    @test state3R.phase == state3R_guizzi.phase
+    @test state4R.phase == state4R_guizzi.phase
+    @test state3R.y_N2 == state3R_guizzi.y_N2
+    @test state4R.y_N2 == state4R_guizzi.y_N2
+    @test state3R.x_N2 == state3R_guizzi.x_N2
+    @test state4R.x_N2 == state4R_guizzi.x_N2
+    @test state3R.liquid_fraction == state3R_guizzi.liquid_fraction
+    @test state4R.liquid_fraction == state4R_guizzi.liquid_fraction
+end
+
