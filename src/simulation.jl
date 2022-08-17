@@ -41,7 +41,7 @@ function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::
         global state1 = State("Air",state1.p,state9.mdot*state9.T+state10.mdot*state10.T,state1.mdot;phase = "gas",y_N2 = state9.mdot*state9.y_N2+state10.mdot*state10.y_N2,x_N2 = x_N2,liquid_fraction = state10.liquid_fraction)
         
         #check convergence
-        #println("\r","Iteration:",i);flush(stdout)
+        #println("\r","Iteration:",i)
         #println(state1) 
 
         push!(solutions,state1)
