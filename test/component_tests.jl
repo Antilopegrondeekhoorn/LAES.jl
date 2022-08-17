@@ -96,6 +96,7 @@ p_difference_2 = abs((state2.p -state2_guizzi.p)/state2_guizzi.p)
 state1H = State("Essotherm650",stateOil_out1.p,(stateOil_out1.T*oil_distribution[1]+stateOil_out2.T*oil_distribution[2]),(stateOil_out1.mdot+stateOil_out2.mdot))
 T_difference_1H = abs((state1H.T -state1H_guizzi.T)/state1H_guizzi.T)
 
+
 @testset "Intercoolers" begin
     @test T_difference_2B < 0.01
     @test p_difference_2B < 0.01 #rounding error
@@ -117,6 +118,7 @@ liquid_fraction_difference_5 = abs((state5.liquid_fraction -state5_guizzi.liquid
     @test x_N2_difference_5 < 0.01
     @test liquid_fraction_difference_5 < 0.01
 end
+h_diff = (state2C.h -705204)/705204
 
 # Separator
 state6,state7 = separator(state5_guizzi)
@@ -183,4 +185,38 @@ state4R = heater_coldstorage(state3R_guizzi,state4C_guizzi,5,0.01)
     @test state3R.liquid_fraction == state3R_guizzi.liquid_fraction
     @test state4R.liquid_fraction == state4R_guizzi.liquid_fraction
 end
+
+# Expanders
+state7R = isentropic_expander(state6R_guizzi,state7R_guizzi.p,0.85)
+T_difference_7R = abs((state7R.T -state7R_guizzi.T)/state7R_guizzi.T)
+
+state9R = isentropic_expander(state8R_guizzi,state9R_guizzi.p,0.85)
+T_difference_9R = abs((state9R.T -state9R_guizzi.T)/state9R_guizzi.T)
+
+state11R = isentropic_expander(state10R_guizzi,state11R_guizzi.p,0.85)
+T_difference_11R = abs((state11R.T -state11R_guizzi.T)/state11R_guizzi.T)
+
+
+@testset "Expanders" begin
+    @test T_difference_7R < 0.01
+    @test T_difference_9R < 0.01
+    @test T_difference_11R < 0.01
+    @test state7R.phase == state7R_guizzi.phase
+    @test state9R.phase == state9R_guizzi.phase
+    @test state11R.phase == state11R_guizzi.phase
+    @test state7R.y_N2 == state7R_guizzi.y_N2
+    @test state9R.y_N2 == state9R_guizzi.y_N2
+    @test state11R.y_N2 == state11R_guizzi.y_N2
+    @test state7R.x_N2 == state7R_guizzi.x_N2
+    @test state9R.x_N2 == state9R_guizzi.x_N2
+    @test state11R.x_N2 == state11R_guizzi.x_N2
+    @test state7R.liquid_fraction == state7R_guizzi.liquid_fraction
+    @test state9R.liquid_fraction == state9R_guizzi.liquid_fraction
+    @test state11R.liquid_fraction == state11R_guizzi.liquid_fraction
+end
+
+#########################################################################
+# Tests extra functions
+#########################################################################
+
 

@@ -155,62 +155,6 @@ function separator(state_in::AirState)
     return liquidstate,vaporstate
 end
 
-function coldbox(coolant1_min::CoolantState,coolant1_max::CoolantState,coolant2_min::CoolantState,coolant2_max::CoolantState,state_in_air::AirState,state_out_air::AirState,state_in_air_feedback::AirState) #to calculate statecoldout
-    #energy balance
-    h_air_out_feedback = ((state_in_air.mdot*(state_in_air.h-state_out_air.h) - coolant1_min.mdot*(coolant1_max.h-coolant1_min.h) - coolant2_min.mdot*(coolant2_max.h-coolant2_min.h))/state_in_air_feedback.mdot)+state_in_air_feedback.h
-    p_out_intermediate = state_in_air_feedback.p-state_in_air_feedback.p*0.01 #2 times 1% procent, because 2 HEX
-    p_out = p_out_intermediate-p_out_intermediate*0.01
-    
-    T_air_out_feedback_guess = 300.001K #[K]
-    iterations = 0
-    prev_steps = []
-    while true
-        iterations +=1
-        h_guess = CoolProp.PropsSI("H","P|gas",p_out,"T",T_air_out_feedback_guess,"PR::Nitrogen[$(state_in_air_feedback.y_N2)]&Oxygen[$(1-state_in_air_feedback.y_N2)]")
-        
-        #change step when closer to solution
-        diff = abs(h_air_out_feedback-ustrip(h_guess))
-        if diff > 5000
-            step = 2K
-        elseif 1000 < diff < 5000
-            step = 1K
-        elseif 500 < diff < 1000
-            step = 0.5K
-        elseif 200 < diff < 500
-            step = 0.1K
-        elseif 100 < diff < 200
-            step = 0.05K
-        elseif 50 < diff < 100
-            step = 0.01K
-        else
-            step = 0.001K
-        end
-        
-        #change the temperature guess
-        if diff < 1
-            global T_air_out_feedback = T_air_out_feedback_guess
-            break
-        elseif ustrip(h_guess) < h_air_out_feedback
-            T_air_out_feedback_guess += step
-            push!(prev_steps,+1)
-        elseif ustrip(h_guess) > h_air_out_feedback
-            T_air_out_feedback_guess -= step
-            push!(prev_steps,-1)
-        end
-
-        #prevent being in an infinite loop
-        if iterations%4 == 0
-            if sum(prev_steps) ==  0
-                @warn "Infinite loop: adjust the steps"
-                break
-            end
-            prev_steps = []
-        end 
-    end
-    state_out = State("Air",p_out,ustrip(T_air_out_feedback),state_in_air_feedback.mdot;phase = state_in_air_feedback.phase,y_N2 = state_in_air_feedback.y_N2,x_N2 = state_in_air_feedback.x_N2,liquid_fraction = state_in_air_feedback.liquid_fraction)
-    return state_out
-end
-
 #########################################################################
 # Storage
 #########################################################################
