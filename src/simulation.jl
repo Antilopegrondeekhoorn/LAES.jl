@@ -50,7 +50,7 @@ function charging_cycle_suboptimal(state_in::AirState,ambient_state::AirState,st
     end
     
     solutions = []
-    state1 = state_in
+    global state1 = state_in
 
     #distribution calculated from reference paper
     stateOil_in1 = State(stateOil_in.fluid,stateOil_in.p,stateOil_in.T,stateOil_in.mdot*oil_distribution[1])
