@@ -20,13 +20,13 @@ function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::
         global state2,stateOil_out2 = intercooler("Cool",state2C,stateOil_in2,pinch_IC,pressure_loss)
         state3_p = state2.p-state2.p*pressure_loss
 
-        if compressor_pressures[end] == 18098000
+        if state2.p == 17917000
             global T4 = propane_min.T+pinch_coldbox
             global yield,T9 = pinch_coldbox_optimal(state2,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
-        elseif compressor_pressures[end] < 18098000 #Assume that the optimal pressure in the reference paper is the effective optimal pressure
+        elseif state2.p < 17917000 #Assume that the optimal pressure in the reference paper is the effective optimal pressure
             global ~,T9 = pinch_coldbox_optimal(state2,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
             global yield,T4 = pinch_coldbox_p_less_optimal(state2,pinch_coldbox,T9,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
-        elseif compressor_pressures[end] > 18098000
+        elseif state2.p > 17917000
             global T4 = propane_min.T+pinch_coldbox
             global yield,T9 = pinch_coldbox_p_more_optimal(state2,pinch_coldbox,T4,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
         end
