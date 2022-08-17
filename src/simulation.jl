@@ -22,13 +22,13 @@ function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::
 
         state2_optimal =State("Air",17917000,308.15,1.0;phase = state2.phase,y_N2 =state2.y_N2,x_N2 = state2.x_N2,liquid_fraction = state2.liquid_fraction)
 
-        if state2.p == 17917000
+        if state2.p == 17917020
             global T4 = propane_min.T+pinch_coldbox
             global yield,T9 = pinch_coldbox_optimal(state2,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
-        elseif state2.p < 17917000 #Assume that the optimal pressure in the reference paper is the effective optimal pressure
+        elseif state2.p < 17917020 #Assume that the optimal pressure in the reference paper is the effective optimal pressure
             global ~,T9 = pinch_coldbox_optimal(state2_optimal,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
             global yield,T4 = pinch_coldbox_p_less_optimal(state2,pinch_coldbox,T9,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
-        elseif state2.p > 17917000
+        elseif state2.p > 17917020
             global T4 = propane_min.T+pinch_coldbox
             global yield,T9 = pinch_coldbox_p_more_optimal(state2,pinch_coldbox,T4,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
         end
