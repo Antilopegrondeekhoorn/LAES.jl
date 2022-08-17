@@ -151,14 +151,14 @@ function isentropic_T(state_in,p_out)
             step = 0.1K
         elseif 2 < diff <10
             step = 0.05K
-        elseif 0.5 < diff <2
+        elseif 0.8 < diff <2
             step = 0.01K
         else
             step = 0.005K
         end
         
         #change the temperature guess
-        if diff < 0.1
+        if diff < 0.5
             global T_out_is = T_out_is_guess
             break
         elseif ustrip(s_is_guess) < state_in.s
@@ -211,14 +211,14 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
             step = 0.1K
         elseif 75 < diff < 250
             step = 0.05K
-        elseif 25 < diff < 75
+        elseif 50 < diff < 75
             step = 0.01K
         else
             step = 0.001K
         end
-        
+
         #change the temperature guess
-        if diff < 10
+        if diff < 15
             global T_out_real = T_out_real_guess
             break
         elseif ustrip(h_out_real_guess) < h_out_real
@@ -432,7 +432,7 @@ function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_mi
             step = 0.001
         end
 
-        if diff < 0.001
+        if diff < 0.005
             global T_cold_air_out = T_cold_air_out_guess
             break
         elseif pinch < pinch_coldbox
@@ -591,7 +591,7 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
             step = 0.001
         end
         
-        if diff < 5
+        if diff < 15
             global T_cold_air_out = T_guess_cold_air_out
             break
         elseif h_cold_air_out_guess < h_cold_air_out
@@ -655,7 +655,7 @@ function find_T_5R(h_5R,p_5R,y_N2)
             step = 0.001K
         end
         #change the temperature guess
-        if diff < 10
+        if diff < 15
             global T_5R = T_5R_guess
             break
         elseif ustrip(h_5R_guess) < h_5R

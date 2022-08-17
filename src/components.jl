@@ -70,7 +70,7 @@ function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
             step = 0.00005
         end
         
-        if diff <0.1 #arbitrary value
+        if diff <0.5 #arbitrary value
             global yield_is = yield_guess_is
             break
         elseif ustrip(s_out_is) < state_in.s
@@ -125,7 +125,7 @@ function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
         end
         
         #change the yield guess
-        if diff <15
+        if diff < 15
             global yield_real = yield_guess_real
             break
         elseif ustrip(h_out) < h_out_real
