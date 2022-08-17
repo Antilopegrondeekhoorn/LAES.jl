@@ -635,7 +635,11 @@ function find_T_5R(h_5R,p_5R,y_N2)
         h_5R_guess = CoolProp.PropsSI("H","T",T_5R_guess,"P|gas",p_5R,"PR::Nitrogen[$(y_N2)]&Oxygen[$(1-y_N2)]") 
         #change step when closer to solution
         diff = abs(ustrip(h_5R_guess)-h_5R) 
-        if diff > 5000
+        if diff > 40000
+            step = 10K
+        elseif 10000 < diff < 40000
+            step = 5K
+        elseif 5000 < diff < 10000
             step = 2K
         elseif 1000 < diff < 5000
             step = 1K
@@ -651,7 +655,7 @@ function find_T_5R(h_5R,p_5R,y_N2)
             step = 0.001K
         end
         #change the temperature guess
-        if diff < 1
+        if diff < 5
             global T_5R = T_5R_guess
             break
         elseif ustrip(h_5R_guess) < h_5R
