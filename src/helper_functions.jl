@@ -199,19 +199,19 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
         
         if diff > 15000
             step = 10K
-        elseif 5000 < diff < 15000
+        elseif 6000 < diff < 15000
             step = 5K
-        elseif 2000 < diff < 5000
+        elseif 2000 < diff < 6000
             step = 2K
-        elseif 1000 < diff < 2000
+        elseif 1100 < diff < 2000
             step = 1K
-        elseif 500 < diff < 1000
+        elseif 600 < diff < 1100
             step = 0.5K
-        elseif 250 < diff < 500
+        elseif 250 < diff < 600
             step = 0.1K
-        elseif 75 < diff < 250
+        elseif 125 < diff < 250
             step = 0.05K
-        elseif 50 < diff < 75
+        elseif 25 < diff < 125
             step = 0.01K
         else
             step = 0.001K
@@ -230,7 +230,7 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
         end
         
         #prevent being in an infinite loop
-        if iterations%4 == 0
+        if iterations%32 == 0
             if sum(prev_steps) ==  0
                 @warn "Infinite loop: adjust the steps"
                 break
