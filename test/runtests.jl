@@ -1,0 +1,1 @@
+include("component_tests.jl")
