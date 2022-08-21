@@ -6,39 +6,39 @@ using Unitful: ustrip
 #########################################################################
 
 # Data charging cycle
-state1_guizzi = State("Air",100000,296.24,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
-state2A_guizzi = State("Air",1480000,687.74,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
-state2B_guizzi = State("Air",1465000,308.15,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
-state2C_guizzi = State("Air",18098000,682.00,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
-state2_guizzi = State("Air",17917000,308.15,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
-state3_guizzi = State("Air",17738000,245.80,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
-state4_guizzi = State("Air",17561000,98.00,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
-state5_guizzi = State("Air",102000,78.91,1;phase = "2phase",y_N2 = 0.93,x_N2 = 0.77,liquid_fraction = 0.842)
-state6_guizzi = State("Air",102000,78.91,0.842;phase = "liquid",y_N2 = 0,x_N2 = 0.77,liquid_fraction = 0.842)
-state7_guizzi = State("Air",102000,78.91,0.158;phase = "gas",y_N2 = 0.93,x_N2 = 0,liquid_fraction = 0)
-state8_guizzi = State("Air",101000,237.80,0.158;phase = "gas",y_N2 = 0.93,x_N2 = 0,liquid_fraction = 0)
-state9_guizzi = State("Air",100000,286.28,0.158;phase = "gas",y_N2 = 0.93,x_N2 = 0,liquid_fraction = 0)
-state10_guizzi = State("Air",100000,298.15,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state1_guizzi = State("Air",100000,296.24,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
+const state2A_guizzi = State("Air",1480000,687.74,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
+const state2B_guizzi = State("Air",1465000,308.15,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
+const state2C_guizzi = State("Air",18098000,682.00,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
+const state2_guizzi = State("Air",17917000,308.15,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
+const state3_guizzi = State("Air",17738000,245.80,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
+const state4_guizzi = State("Air",17561000,98.00,1;phase = "gas",y_N2 = 0.795,x_N2 = 0,liquid_fraction = 0)
+const state5_guizzi = State("Air",102000,78.91,1;phase = "2phase",y_N2 = 0.93,x_N2 = 0.77,liquid_fraction = 0.842)
+const state6_guizzi = State("Air",102000,78.91,0.842;phase = "liquid",y_N2 = 0,x_N2 = 0.77,liquid_fraction = 0.842)
+const state7_guizzi = State("Air",102000,78.91,0.158;phase = "gas",y_N2 = 0.93,x_N2 = 0,liquid_fraction = 0)
+const state8_guizzi = State("Air",101000,237.80,0.158;phase = "gas",y_N2 = 0.93,x_N2 = 0,liquid_fraction = 0)
+const state9_guizzi = State("Air",100000,286.28,0.158;phase = "gas",y_N2 = 0.93,x_N2 = 0,liquid_fraction = 0)
+const state10_guizzi = State("Air",100000,298.15,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
 
 # Data discharge cycle
-state1R_guizzi = State("Air",100000,78.74,0.842;phase = "liquid",y_N2 = 0,x_N2 = 0.77,liquid_fraction = 1)
-state2R_guizzi = State("Air",6500000,81.89,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state3R_guizzi = State("Air",6435000,209.00,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state4R_guizzi = State("Air",6371000,283.00,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state5R_guizzi = State("Air",6307000,436.27,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state6R_guizzi = State("Air",6244000,616.42,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state7R_guizzi = State("Air",1590000,450.55,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state8R_guizzi = State("Air",1574000,616.42,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state9R_guizzi = State("Air",401000,451.23,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state10R_guizzi = State("Air",397000,616.42,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state11R_guizzi = State("Air",101000,451.42,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
-state12R_guizzi = State("Air",100000,288.00,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state1R_guizzi = State("Air",100000,78.74,0.842;phase = "liquid",y_N2 = 0,x_N2 = 0.77,liquid_fraction = 1)
+const state2R_guizzi = State("Air",6500000,81.89,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state3R_guizzi = State("Air",6435000,209.00,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state4R_guizzi = State("Air",6371000,283.00,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state5R_guizzi = State("Air",6307000,436.27,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state6R_guizzi = State("Air",6244000,616.42,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state7R_guizzi = State("Air",1590000,450.55,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state8R_guizzi = State("Air",1574000,616.42,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state9R_guizzi = State("Air",401000,451.23,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state10R_guizzi = State("Air",397000,616.42,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state11R_guizzi = State("Air",101000,451.42,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
+const state12R_guizzi = State("Air",100000,288.00,0.842;phase = "gas",y_N2 = 0.77,x_N2 = 0,liquid_fraction = 0)
 
 # Data thermal oil (Essotherm650)
-state1H_guizzi = State("Essotherm650",100000,626.42,0.999)
-state2H_guizzi = State("Essotherm650",100000,288.15,0.999)
-state3H_guizzi = State("Essotherm650",100000,626.42,0.999)
-state4H_guizzi = State("Essotherm650",100000,460.71,0.999)
+const state1H_guizzi = State("Essotherm650",100000,626.42,0.999)
+const state2H_guizzi = State("Essotherm650",100000,288.15,0.999)
+const state3H_guizzi = State("Essotherm650",100000,626.42,0.999)
+const state4H_guizzi = State("Essotherm650",100000,460.71,0.999)
 
     # Thermal oil distribution charging (calculated with the enthalpies of the reference paper + applying energy conservation)
 oil1 = (707.454-308.727)/(0.999*(849.94-26.95))
@@ -56,10 +56,10 @@ oil3R_new = oil3R/sum([oil1R,oil2R,oil3R])
 oil_distribution_R = [oil1R_new oil2R_new oil3R_new]
 
 # Data coolants 
-state1C_guizzi = State("Propane",100000,93,1.019)
-state2C_guizzi = State("Propane",100000,214,1.019)
-state3C_guizzi = State("Methanol",100000,214,0.437)
-state4C_guizzi = State("Methanol",100000,288,0.437)
+const state1CS_guizzi = State("Propane",100000,93,1.019)
+const state2CS_guizzi = State("Propane",100000,214,1.019)
+const state3CS_guizzi = State("Methanol",100000,214,0.437)
+const state4CS_guizzi = State("Methanol",100000,288,0.437)
 
 #########################################################################
 # Tests charging cycle
@@ -195,8 +195,8 @@ T_difference_2R = abs((state2R.T -state2R_guizzi.T)/state2R_guizzi.T)
 end
 
 # Heaters
-state3R = heater_coldstorage(state2R_guizzi,state2C_guizzi,5,0.01)
-state4R = heater_coldstorage(state3R_guizzi,state4C_guizzi,5,0.01)
+state3R = heater_coldstorage(state2R_guizzi,state2CS_guizzi,5,0.01)
+state4R = heater_coldstorage(state3R_guizzi,state4CS_guizzi,5,0.01)
 
 @testset "Heaters" begin
     @test state3R.T == state3R_guizzi.T
