@@ -1,6 +1,6 @@
 using LAES
 using Test
-
+using Unitful: ustrip
 #########################################################################
 # Use the reference paper of Guizzi to validate the component functions
 #########################################################################
@@ -97,12 +97,38 @@ state1H = State("Essotherm650",stateOil_out1.p,(stateOil_out1.T*oil_distribution
 T_difference_1H = abs((state1H.T -state1H_guizzi.T)/state1H_guizzi.T)
 
 
+stateOil_in1_R = State(state1H_guizzi.fluid,state1H_guizzi.p,state1H_guizzi.T,state1H_guizzi.mdot*oil_distribution_R[1])
+stateOil_in2_R = State(state1H_guizzi.fluid,state1H_guizzi.p,state1H_guizzi.T,state1H_guizzi.mdot*oil_distribution_R[2])
+stateOil_in3_R = State(state1H_guizzi.fluid,state1H_guizzi.p,state1H_guizzi.T,state1H_guizzi.mdot*oil_distribution_R[3])
+        
+state6R,stateOil_out1_R = intercooler("Heat",state5R_guizzi,stateOil_in1_R,10,0.01)
+T_difference_6R = abs((state6R.T -state6R_guizzi.T)/state6R_guizzi.T)
+p_difference_6R = abs((state6R.p -state6R_guizzi.p)/state6R_guizzi.p)
+state8R,stateOil_out2_R = intercooler("Heat",state7R_guizzi,stateOil_in2_R,10,0.01)
+T_difference_8R = abs((state8R.T -state8R_guizzi.T)/state8R_guizzi.T)
+p_difference_8R = abs((state8R.p -state8R_guizzi.p)/state8R_guizzi.p)
+state10R,stateOil_out3_R = intercooler("Heat",state9R_guizzi,stateOil_in3_R,10,0.01)
+T_difference_10R = abs((state10R.T -state10R_guizzi.T)/state10R_guizzi.T)
+p_difference_10R = abs((state10R.p -state10R_guizzi.p)/state10R_guizzi.p)
+
+state4H = State("Essotherm650",stateOil_out1_R.p,(stateOil_out1_R.T*oil_distribution_R[1]+stateOil_out2_R.T*oil_distribution_R[2]+stateOil_out3_R.T*oil_distribution_R[3]),(stateOil_out1_R.mdot+stateOil_out2_R.mdot+stateOil_out3_R.mdot))
+T_difference_4H = abs((state4H.T -state4H_guizzi.T)/state4H_guizzi.T)
+mdot_difference_4H = abs((state4H.mdot -state4H_guizzi.mdot)/state4H_guizzi.mdot)
+
 @testset "Intercoolers" begin
     @test T_difference_2B < 0.01
     @test p_difference_2B < 0.01 #rounding error
     @test T_difference_2 < 0.01
     @test p_difference_2 < 0.01 #rounding error
     @test T_difference_1H < 0.01
+    @test T_difference_6R < 0.01
+    @test p_difference_6R < 0.01 #rounding error
+    @test T_difference_8R < 0.01
+    @test p_difference_8R < 0.01 #rounding error
+    @test T_difference_10R < 0.01
+    @test p_difference_10R < 0.01 #rounding error
+    @test T_difference_4H < 0.01
+    @test mdot_difference_4H < 0.01
 end
 
 # Cryo-expander
@@ -118,7 +144,6 @@ liquid_fraction_difference_5 = abs((state5.liquid_fraction -state5_guizzi.liquid
     @test x_N2_difference_5 < 0.01
     @test liquid_fraction_difference_5 < 0.01
 end
-h_diff = (state2C.h -705204)/705204
 
 # Separator
 state6,state7 = separator(state5_guizzi)
@@ -219,4 +244,9 @@ end
 # Tests extra functions
 #########################################################################
 
+T_5R = find_T_5R(state5R_guizzi.h,state5R_guizzi.p,state5R_guizzi.y_N2)
+T_difference_5R = abs((ustrip(T_5R) -state5R_guizzi.T)/state5R_guizzi.T)
 
+@testset "Extras" begin
+    @test T_difference_5R < 0.01
+end

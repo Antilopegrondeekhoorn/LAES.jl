@@ -20,7 +20,7 @@ function intercooler(func::String,state_in_air::AirState,state_in_oil::OilState,
     elseif func == "Heat"
         T_out_air = state_in_oil.T-pinch
     else
-        @warn("Function of the intercooler not defined. The intercooler can 'Cool' or 'Heat' the air stream.")
+        @error("Function of the intercooler not defined. The intercooler can 'Cool' or 'Heat' the air stream.")
     end
     #pressure loss
     p_out_air = state_in_air.p - state_in_air.p*pressureloss
@@ -70,7 +70,7 @@ function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
             step = 0.00005
         end
         
-        if diff <0.5 #arbitrary value
+        if diff <0.1 #arbitrary value
             global yield_is = yield_guess_is
             break
         elseif ustrip(s_out_is) < state_in.s
@@ -81,9 +81,9 @@ function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
             push!(prev_steps,+1)
         end
         #prevent being in an infinite loop
-        if iterations%4 == 0
+        if iterations%10 == 0
             if sum(prev_steps) ==  0
-                @warn "Infinite loop: adjust the steps"
+                @error "Infinite loop: adjust the steps"
                 break
             end
             prev_steps = []
@@ -137,7 +137,7 @@ function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
         end
         
         #prevent being in an infinite loop
-        if iterations%8 == 0
+        if iterations%10 == 0
             if sum(prev_steps) ==  0
                 @warn "Infinite loop: adjust the steps"
                 break
@@ -150,8 +150,8 @@ function isentropic_cryoexpander(state_in::AirState,p_out,η_e)
 end
 
 function separator(state_in::AirState)
-    liquidstate = State("Air",state_in.p,state_in.T,state_in.liquid_fraction;phase = "liquid",y_N2 = 0,x_N2 = state_in.x_N2,liquid_fraction = 1) #wrong calculation of h and s
-    vaporstate = State("Air",state_in.p,state_in.T,1-state_in.liquid_fraction;phase = "gas",y_N2 = state_in.y_N2,x_N2 = 0,liquid_fraction = 0) #wrong calculation of h and s
+    liquidstate = State("Air",state_in.p,state_in.T,state_in.liquid_fraction;phase = "liquid",y_N2 = 0,x_N2 = state_in.x_N2,liquid_fraction = 1) 
+    vaporstate = State("Air",state_in.p,state_in.T,1-state_in.liquid_fraction;phase = "gas",y_N2 = state_in.y_N2,x_N2 = 0,liquid_fraction = 0) 
     return liquidstate,vaporstate
 end
 

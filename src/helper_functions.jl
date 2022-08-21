@@ -1,7 +1,6 @@
 # Packages
 using CoolProp
 using Unitful: m, J, kPa, Pa, kg, K, W, °C, l, MW, g, uconvert, °, ustrip, s, kW, hr,mol,kJ
-using DataFrames
 using CurveFit
 
 ########################################################
@@ -149,12 +148,10 @@ function isentropic_T(state_in,p_out)
             step = 0.5K
         elseif 10 < diff < 25
             step = 0.1K
-        elseif 2 < diff <10
+        elseif 4 < diff <10
             step = 0.05K
-        elseif 0.8 < diff <2
-            step = 0.01K
         else
-            step = 0.005K
+            step = 0.01K
         end
         
         #change the temperature guess
@@ -170,7 +167,7 @@ function isentropic_T(state_in,p_out)
         end
         
         #prevent being in an infinite loop
-        if iterations%4 == 0
+        if iterations%10 == 0
             if sum(prev_steps) ==  0
                 @error("Infinite loop: adjust the steps")
                 break
@@ -201,24 +198,24 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
             step = 10K
         elseif 6000 < diff < 15000
             step = 5K
-        elseif 2000 < diff < 6000
+        elseif 2250 < diff < 6000
             step = 2K
-        elseif 1100 < diff < 2000
+        elseif 1125 < diff < 2250
             step = 1K
-        elseif 600 < diff < 1100
+        elseif 600 < diff < 1125
             step = 0.5K
-        elseif 250 < diff < 600
+        elseif 275 < diff < 600
             step = 0.1K
-        elseif 125 < diff < 250
+        elseif 135 < diff < 275
             step = 0.05K
-        elseif 25 < diff < 125
+        elseif 50 < diff < 135
             step = 0.01K
         else
             step = 0.001K
         end
 
         #change the temperature guess
-        if diff < 15
+        if diff < 10
             global T_out_real = T_out_real_guess
             break
         elseif ustrip(h_out_real_guess) < h_out_real
@@ -232,7 +229,7 @@ function T_real(T_isentropic,state_in,p_out,h_out_real)
         #prevent being in an infinite loop
         if iterations%32 == 0
             if sum(prev_steps) ==  0
-                @warn "Infinite loop: adjust the steps"
+                @error "Infinite loop: adjust the steps"
                 break
             end
             prev_steps = []
@@ -340,18 +337,17 @@ end
     
 function T_compressed_air(h,shifted_hs_compressed_air,T)
     first_diff = shifted_hs_compressed_air[1]-shifted_hs_compressed_air[2]
-    if first_diff > 30
-        @warn("Make the 'hs_compressed_air' finer. The difference in enthalpy between the first two values should be smaller than 30 J/kg.")
+    if (first_diff/2) > 35
+        @warn("Make the 'hs_compressed_air' finer. The difference in enthalpy between the first two values divided by two should be smaller than 35 J/kg.")
     end
     index = findfirst(x -> x<=h,shifted_hs_compressed_air)
     return T[index]
 end
-
-function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss_IC)
+function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss_IC)
     # Compressed air
-    T_compressed_air_out = 98
+    T_compressed_air_out = propane_min.T+pinch_coldbox
     h_airs = []
-    T = [state_compressed_air_in.T:-0.02:T_compressed_air_out;T_compressed_air_out]
+    T = [state_compressed_air_in.T:-0.05:T_compressed_air_out;T_compressed_air_out]
     for i = 1:length(T)
         compressed_air_h = CoolProp.PropsSI("H","P|gas",state_compressed_air_in.p,"T",T[i],"PR::Nitrogen[$(state_compressed_air_in.y_N2)]&Oxygen[$(1-state_compressed_air_in.y_N2)]")
         push!(h_airs,compressed_air_h)
@@ -359,11 +355,31 @@ function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_mi
     h_air_min = minimum(h_airs)
     shifted_h_airs = (h_airs-ones(length(h_airs),1)*h_air_min)
     global h_max_compressed_air = maximum(shifted_h_airs)
+
+    # Coolants
+    T_min_propane = propane_min.T
+    T_max_propane = propane_max.T
+    mdot_propane = propane_min.mdot
+    h_min_propane = CoolProp.PropsSI("H","T",T_min_propane,"P|liquid",100000,"Propane")
+    h_max_propane = CoolProp.PropsSI("H","T",T_max_propane,"P|liquid",100000,"Propane")
     
+    T_min_methanol = methanol_min.T
+    T_max_methanol = methanol_max.T
+    mdot_methanol = methanol_min.mdot
+    h_min_methanol = CoolProp.PropsSI("H","T",T_min_methanol,"P|liquid",100000,"Methanol")
+    h_max_methanol = CoolProp.PropsSI("H","T",T_max_methanol,"P|liquid",100000,"Methanol")
+    
+    #shift propane and methanol
+    global h_max_propane_shifted = (h_max_propane+abs(h_min_propane))*mdot_propane
+    global h_max_methanol_shifted = (h_max_methanol+abs(h_min_methanol))*mdot_methanol 
+    global coeff = h_max_compressed_air/(h_max_propane_shifted+h_max_methanol_shifted)
+        
+    h_max_propane_shifted = (h_max_propane+abs(h_min_propane))*mdot_propane*coeff
+
     # Cold air
     state3_p = state_compressed_air_in.p-state_compressed_air_in.p*pressure_loss_IC
     state4 = State("Air",state3_p-state3_p*pressure_loss_IC,T_compressed_air_out,state_compressed_air_in.mdot;phase = state_compressed_air_in.phase,y_N2 = state_compressed_air_in.y_N2,x_N2 = state_compressed_air_in.x_N2,liquid_fraction = state_compressed_air_in.liquid_fraction)
-    state5 =  isentropic_cryoexpander(state4,102000Pa,η_e)
+    state5 =  isentropic_cryoexpander(state4,102000Pa,η_cryo_e)
     state6,state7 = separator(state5)
 
     T_cold_air_in = state5.T
@@ -374,27 +390,7 @@ function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_mi
         iterations +=1
         h_cold_air_in = CoolProp.PropsSI("H","P|gas",102000,"T",T_cold_air_in,"PR::Nitrogen[$(state7.y_N2)]&Oxygen[$(1-state7.y_N2)]")
         h_cold_air_out = CoolProp.PropsSI("H","P|gas",100000,"T",T_cold_air_out_guess,"PR::Nitrogen[$(state7.y_N2)]&Oxygen[$(1-state7.y_N2)]")
-
-        # Coolants
-        T_min_propane = propane_min.T
-        T_max_propane = propane_max.T
-        mdot_propane = propane_min.mdot
-        h_min_propane = CoolProp.PropsSI("H","T",T_min_propane,"P|liquid",100000,"Propane")
-        h_max_propane = CoolProp.PropsSI("H","T",T_max_propane,"P|liquid",100000,"Propane")
-    
-        T_min_methanol = methanol_min.T
-        T_max_methanol = methanol_max.T
-        mdot_methanol = methanol_min.mdot
-        h_min_methanol = CoolProp.PropsSI("H","T",T_min_methanol,"P|liquid",100000,"Methanol")
-        h_max_methanol = CoolProp.PropsSI("H","T",T_max_methanol,"P|liquid",100000,"Methanol")
-    
-        #shift propane and methanol
-        h_max_propane_shifted = (h_max_propane+abs(h_min_propane))*mdot_propane
-        h_max_methanol_shifted = (h_max_methanol+abs(h_min_methanol))*mdot_methanol 
-        coeff = h_max_compressed_air/(h_max_propane_shifted+h_max_methanol_shifted)
-
-        h_max_propane_shifted = (h_max_propane+abs(h_min_propane))*mdot_propane*coeff
-
+        global h_difference = h_cold_air_out-h_cold_air_in
     
         p = poly_fit(range(h_max_compressed_air,0,1000),range(T_cold_air_out_guess,T_cold_air_in,1000),1)
         Qcoldair(h) = p[1]+p[2]*h
@@ -412,6 +408,7 @@ function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_mi
         pinch = minimum(search_pinch)
         
         diff = abs(pinch_coldbox - pinch)
+        
         if diff > 5
             step = 4
         elseif 2 < diff < 5
@@ -424,15 +421,17 @@ function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_mi
             step = 0.2
         elseif 0.1 < diff < 0.2
             step = 0.1
-        elseif 0.02 < diff < 0.1
+        elseif 0.04 < diff < 0.1
             step = 0.05
-        elseif 0.005 < diff < 0.02
+        elseif 0.005 < diff < 0.04
             step = 0.005
-        else
+        elseif 0.0025 < diff < 0.005
             step = 0.001
+        else
+            step = 0.0005
         end
-
-        if diff < 0.005
+       
+        if diff < 0.001
             global T_cold_air_out = T_cold_air_out_guess
             break
         elseif pinch < pinch_coldbox
@@ -442,11 +441,11 @@ function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_mi
             T_cold_air_out_guess += step
             push!(prev_steps,+1)
         end
-
+        
         #prevent being in an infinite loop
-        if iterations%4 == 0
+        if iterations%10 == 0
             if sum(prev_steps) ==  0
-                @error("Infinite loop: adjust the steps")
+                @error "Infinite loop: adjust the steps"
                 break
             end
             prev_steps = []
@@ -455,7 +454,7 @@ function pinch_coldbox_optimal(state_compressed_air_in,pinch_coldbox,methanol_mi
     return state6.mdot,T_cold_air_out
 end
 
-function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_cold_air_out_optimal,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
+function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_cold_air_out_optimal,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss_IC)
     iterations = 0
     prev_steps = []
     T_guess_compressed_air_out = 115
@@ -463,7 +462,7 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
         iterations +=1
         # Compressed air
         h_airs = []
-        T = [state_compressed_air_in.T:-0.02:T_guess_compressed_air_out;T_guess_compressed_air_out]
+        T = [state_compressed_air_in.T:-0.05:T_guess_compressed_air_out;T_guess_compressed_air_out]
         for i = 1:length(T)
             compressed_air_h = CoolProp.PropsSI("H","P|gas",state_compressed_air_in.p,"T",T[i],"PR::Nitrogen[$(state_compressed_air_in.y_N2)]&Oxygen[$(1-state_compressed_air_in.y_N2)]")
             push!(h_airs,compressed_air_h)
@@ -473,15 +472,16 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
         global h_max_compressed_air = maximum(shifted_h_airs)
     
         # Cold air
-        state3_p = state_compressed_air_in.p-state_compressed_air_in.p*pressure_loss
-        state4 = State("Air",state3_p-state3_p*pressure_loss,T_guess_compressed_air_out,state_compressed_air_in.mdot;phase = state_compressed_air_in.phase,y_N2 = state_compressed_air_in.y_N2,x_N2 = state_compressed_air_in.x_N2,liquid_fraction = state_compressed_air_in.liquid_fraction)
-        state5 =  isentropic_cryoexpander(state4,102000Pa,η_e)
+        state3_p = state_compressed_air_in.p-state_compressed_air_in.p*pressure_loss_IC
+        state4 = State("Air",state3_p-state3_p*pressure_loss_IC,T_guess_compressed_air_out,state_compressed_air_in.mdot;phase = state_compressed_air_in.phase,y_N2 = state_compressed_air_in.y_N2,x_N2 = state_compressed_air_in.x_N2,liquid_fraction = state_compressed_air_in.liquid_fraction)
+        state5 =  isentropic_cryoexpander(state4,102000Pa,η_cryo_e)
         global state6,state7 = separator(state5)
 
         T_cold_air_in = state5.T 
         h_cold_air_in = CoolProp.PropsSI("H","P|gas",102000,"T",T_cold_air_in,"PR::Nitrogen[$(state7.y_N2)]&Oxygen[$(1-state7.y_N2)]")
         h_cold_air_out = CoolProp.PropsSI("H","P|gas",100000,"T",T_cold_air_out_optimal,"PR::Nitrogen[$(state7.y_N2)]&Oxygen[$(1-state7.y_N2)]") #from the optimal case
 
+ 
         p = poly_fit(range(h_max_compressed_air,0,1000),range(T_cold_air_out_optimal,T_cold_air_in,1000),1)
         Qcoldair(h) = p[1]+p[2]*h
 
@@ -495,19 +495,21 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
     
         diff = abs(pinch_coldbox - pinch)
         
-        if diff > 5
+        if diff > 5.5
+            step = 10
+        elseif 3.5 < diff < 5.5
             step = 5
-        elseif 2 < diff < 5
+        elseif 1.25 < diff < 3.5
             step = 2
-        elseif 0.5 < diff < 2
+        elseif 0.5 < diff < 1.25
             step = 1
-        elseif 0.2 < diff < 0.5
+        elseif 0.225 < diff < 0.5
             step = 0.5
-        elseif 0.1 < diff < 0.2
+        elseif 0.1 < diff < 0.225
             step = 0.1
-        elseif 0.05 < diff < 0.1
-            step = 0.02
-        elseif 0.02 < diff < 0.05
+        elseif 0.025 < diff < 0.1
+            step = 0.05
+        elseif 0.01 < diff < 0.025
             step = 0.002
         else
             step = 0.001
@@ -525,9 +527,9 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
         end
         
         #prevent being in an infinite loop
-        if iterations%4 == 0
+        if iterations%10 == 0
             if sum(prev_steps) ==  0
-                @error("Infinite loop: adjust the steps")
+                @error "Infinite loop: adjust the steps"
                 break
             end
             prev_steps = []
@@ -537,7 +539,7 @@ function pinch_coldbox_p_less_optimal(state_compressed_air_in,pinch_coldbox,T_co
     return state6.mdot,T_compressed_air_out
 end
 
-function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_compressed_air_out_optimal,methanol_min,methanol_max,propane_min,propane_max,η_e,pressure_loss)
+function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_compressed_air_out_optimal,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss_IC)
     iterations = 0
     prev_steps = []
     T_guess_cold_air_out = 300
@@ -545,7 +547,7 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         iterations +=1
         # Compressed air
         h_airs = []
-        T = [state_compressed_air_in.T:-0.02:T_compressed_air_out_optimal;T_compressed_air_out_optimal]
+        T = [state_compressed_air_in.T:-0.05:T_compressed_air_out_optimal;T_compressed_air_out_optimal]
         for i = 1:length(T)
             compressed_air_h = CoolProp.PropsSI("H","P|gas",state_compressed_air_in.p,"T",T[i],"PR::Nitrogen[$(state_compressed_air_in.y_N2)]&Oxygen[$(1-state_compressed_air_in.y_N2)]")
             push!(h_airs,compressed_air_h)
@@ -555,9 +557,9 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         global h_max_compressed_air = maximum(shifted_h_airs)
     
         # Cold air
-        state3_p = state_compressed_air_in.p-state_compressed_air_in.p*pressure_loss
-        state4 = State("Air",state3_p-state3_p*pressure_loss,T_compressed_air_out_optimal,state_compressed_air_in.mdot;phase = state_compressed_air_in.phase,y_N2 = state_compressed_air_in.y_N2,x_N2 = state_compressed_air_in.x_N2,liquid_fraction = state_compressed_air_in.liquid_fraction)
-        state5 =  isentropic_cryoexpander(state4,102000Pa,η_e)
+        state3_p = state_compressed_air_in.p-state_compressed_air_in.p*pressure_loss_IC
+        state4 = State("Air",state3_p-state3_p*pressure_loss_IC,T_compressed_air_out_optimal,state_compressed_air_in.mdot;phase = state_compressed_air_in.phase,y_N2 = state_compressed_air_in.y_N2,x_N2 = state_compressed_air_in.x_N2,liquid_fraction = state_compressed_air_in.liquid_fraction)
+        state5 =  isentropic_cryoexpander(state4,102000Pa,η_cryo_e)
         global state6,state7 = separator(state5)
 
         T_cold_air_in = state5.T 
@@ -567,27 +569,31 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
         h_cold_air_out_guess = CoolProp.PropsSI("H","P|gas",100000,"T",T_guess_cold_air_out,"PR::Nitrogen[$(state7.y_N2)]&Oxygen[$(1-state7.y_N2)]") 
         diff = abs(h_cold_air_out- h_cold_air_out_guess)
         
-        if diff > 15000
+        if diff > 10000
             step = 10
-        elseif 7500 < diff < 15000
+        elseif 5000 < diff < 10000
             step = 5
-        elseif 2500 < diff < 7500
+        elseif 2000 < diff < 5000
             step = 2
-        elseif 1250 < diff < 2500
+        elseif 1000 < diff < 2000
             step = 1
-        elseif 500 < diff < 1250
+        elseif 500 < diff < 1000
             step = 0.5
-        elseif 150 < diff < 500
+        elseif 200 < diff < 500
             step = 0.1
-        elseif 75 < diff < 150
+        elseif 50 < diff < 200
             step = 0.05
-        elseif 25 < diff < 75
+        elseif 20 < diff < 50
             step = 0.01
-        else
+        elseif 10 < diff < 20
             step = 0.005
+        elseif 5 < diff < 10
+            step = 0.002
+        else
+            step = 0.001
         end
-    
-        if diff < 20
+        
+        if diff < 15
             global T_cold_air_out = T_guess_cold_air_out
             break
         elseif h_cold_air_out_guess < h_cold_air_out
@@ -597,10 +603,11 @@ function pinch_coldbox_p_more_optimal(state_compressed_air_in,pinch_coldbox,T_co
             T_guess_cold_air_out -= step
             push!(prev_steps,-1)
         end
+
         #prevent being in an infinite loop
-        if iterations%6 == 0
+        if iterations%10 == 0
             if sum(prev_steps) ==  0
-                @error("Infinite loop: adjust the steps")
+                @error "Infinite loop: adjust the steps"
                 break
             end
             prev_steps = []
@@ -628,6 +635,7 @@ function find_T_5R(h_5R,p_5R,y_N2)
     while true
         iterations +=1
         h_5R_guess = CoolProp.PropsSI("H","T",T_5R_guess,"P|gas",p_5R,"PR::Nitrogen[$(y_N2)]&Oxygen[$(1-y_N2)]") 
+
         #change step when closer to solution
         diff = abs(ustrip(h_5R_guess)-h_5R) 
         if diff > 40000
@@ -661,7 +669,7 @@ function find_T_5R(h_5R,p_5R,y_N2)
             push!(prev_steps,-1)
         end
         #prevent being in an infinite loop
-        if iterations%4 == 0
+        if iterations%10 == 0
             if sum(prev_steps) ==  0
                 @error("Infinite loop: adjust the steps")
                 break

@@ -1,6 +1,6 @@
 include("components.jl")
 
-function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::OilState,oil_distribution,methanol_min,methanol_max,propane_min,propane_max,pinch_IC,pinch_coldbox,compressor_pressures,η_c,η_cryo_e,pressure_loss)
+function charging_c(state_in::AirState,ambient_state::AirState,stateOil_in::OilState,oil_distribution,methanol_min,methanol_max,propane_min,propane_max,pinch_IC,pinch_coldbox,compressor_pressures,η_c,η_cryo_e,pressure_loss)
     number_of_compressors = 2
     if length(compressor_pressures) != number_of_compressors && length(oil_distribution) != number_of_compressors
         error("The length of the 'compressor_pressures' and the 'oil_distribution' must be equal to the number of compressors.")
@@ -20,7 +20,7 @@ function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::
         global state2,stateOil_out2 = intercooler("Cool",state2C,stateOil_in2,pinch_IC,pressure_loss)
         state3_p = state2.p-state2.p*pressure_loss
 
-        state2_optimal =State("Air",17917000,308.15,1.0;phase = state2.phase,y_N2 =state2.y_N2,x_N2 = state2.x_N2,liquid_fraction = state2.liquid_fraction)
+        state2_optimal =State("Air",17917020,308.15,1.0;phase = state2.phase,y_N2 =state2.y_N2,x_N2 = state2.x_N2,liquid_fraction = state2.liquid_fraction)
 
         if state2.p == 17917020
             global T4 = propane_min.T+pinch_coldbox
@@ -28,28 +28,30 @@ function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::
         elseif state2.p < 17917020 #Assume that the optimal pressure in the reference paper is the effective optimal pressure
             global ~,T9 = pinch_coldbox_optimal(state2_optimal,pinch_coldbox,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
             global yield,T4 = pinch_coldbox_p_less_optimal(state2,pinch_coldbox,T9,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
+        
         elseif state2.p > 17917020
             global T4 = propane_min.T+pinch_coldbox
             global yield,T9 = pinch_coldbox_p_more_optimal(state2,pinch_coldbox,T4,methanol_min,methanol_max,propane_min,propane_max,η_cryo_e,pressure_loss)
         end
-
+        
         global state4 = State("Air",state3_p-state3_p*pressure_loss,T4,state2.mdot;phase = state2.phase,y_N2 = state2.y_N2,x_N2 = state2.x_N2,liquid_fraction = state2.liquid_fraction)
         global state5 =  isentropic_cryoexpander(state4,102000,η_cryo_e)
         global state6,state7 = separator(state5)
+        
         global state9 = State("Air",state1.p,T9,state7.mdot;phase = state7.phase,y_N2 = state7.y_N2,x_N2 = state7.x_N2,liquid_fraction = state7.liquid_fraction)
         global state10 = State("Air",ambient_state.p,ambient_state.T,state6.mdot;phase = ambient_state.phase,y_N2 = ambient_state.y_N2,x_N2 = ambient_state.x_N2,liquid_fraction = ambient_state.liquid_fraction) #standard conditions
         global state1 = State("Air",state1.p,state9.mdot*state9.T+state10.mdot*state10.T,state1.mdot;phase = "gas",y_N2 = state9.mdot*state9.y_N2+state10.mdot*state10.y_N2,x_N2 = x_N2,liquid_fraction = state10.liquid_fraction)
         
         #check convergence
-        println(i)
-        #println(state1) 
+        println(i);flush(stdout)
+        
 
         push!(solutions,state1)
         if length(solutions) > 1 && compare(solutions[end-1],solutions[end])
             break
         end
-        if i == 15
-            @error("Did not converge after 15 iterations")
+        if i == 25
+            @error("Did not converge after 25 iterations")
         end
     end
     state1H = State("Essotherm650",stateOil_out1.p,(stateOil_out1.T*oil_distribution[1]+stateOil_out2.T*oil_distribution[2]),(stateOil_out1.mdot+stateOil_out2.mdot))
@@ -105,3 +107,4 @@ function discharge_cycle(state1R::AirState,stateOil_in::OilState,oil_distributio
 
     return state1R,state2R,state3R,state4R,state5R,state6R,state7R,state8R,state9R,state10R,state11R,state12R,state4H
 end
+
