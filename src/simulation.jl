@@ -1,6 +1,6 @@
 include("components.jl")
 
-function charging_c(state_in::AirState,ambient_state::AirState,stateOil_in::OilState,oil_distribution,methanol_min,methanol_max,propane_min,propane_max,pinch_IC,pinch_coldbox,compressor_pressures,η_c,η_cryo_e,pressure_loss)
+function charging_cycle(state_in::AirState,ambient_state::AirState,stateOil_in::OilState,oil_distribution,methanol_min,methanol_max,propane_min,propane_max,pinch_IC,pinch_coldbox,compressor_pressures,η_c,η_cryo_e,pressure_loss)
     number_of_compressors = 2
     if length(compressor_pressures) != number_of_compressors && length(oil_distribution) != number_of_compressors
         error("The length of the 'compressor_pressures' and the 'oil_distribution' must be equal to the number of compressors.")
